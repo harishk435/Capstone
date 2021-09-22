@@ -107,7 +107,7 @@ jobs:
       - run:
           name: delete stack
           command: |
-            for awsStackName in $(aws cloudformation list-stacks --query "Stacks[].StackName" --stack-status-filter CREATE_COMPLETE);
+            for awsStackName in $(aws cloudformation list-stacks --region=$AWS_DEFAULT_REGION --query "Stacks[].StackName" --stack-status-filter CREATE_COMPLETE);
             do
               echo "deleting $awsStackName"
               aws cloudformation delete-stack --stack-name $awsStackName
