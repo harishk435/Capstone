@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: uda_capstone
+  name: uda-capstone
   labels:
-    app: uda_capstone
+    app: uda-capstone
   namespace: default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: uda_capstone
+      app: uda-capstone
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -18,12 +18,12 @@ spec:
   template:
     metadata:
       labels:
-        app: uda_capstone
+        app: uda-capstone
     spec:
       containers:
       - image: harishkumarrajput/$CIRCLE_PROJECT_REPONAME
         imagePullPolicy: Always
-        name: uda_capstone
+        name: uda-capstone
         ports:
         - containerPort: 80
           protocol: TCP
