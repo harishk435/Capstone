@@ -53,7 +53,7 @@ jobs:
           name: cluster setup
           command: |
             #Only create cluster if not exists  
-            export completeStackCount=`aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE | grep "<< parameters.cluster_name >>" | wc -l`
+            export completeStackCount=`aws cloudformation list-stacks --region $AWS_DEFAULT_REGION --stack-status-filter CREATE_COMPLETE | grep "<< parameters.cluster_name >>" | wc -l`
             if [[ $completeStackCount -gt 0 ]]
             then
               echo "Cluster already created"
@@ -108,10 +108,12 @@ jobs:
           name: delete stack
           command: |
             echo ${AWS_DEFAULT_REGION}
-            for awsStackName in $(aws cloudformation list-stacks --region=${AWS_DEFAULT_REGION} --stack-status-filter CREATE_COMPLETE | grep "<< parameters.cluster_name >>");
+            for STACK_NAME in $(aws cloudformation list-stacks --region=${AWS_DEFAULT_REGION} --stack-status-filter CREATE_COMPLETE --query StackSummaries[].StackName);
             do
-              echo "deleting $awsStackName"
-              aws cloudformation delete-stack --stack-name $awsStackName
+              echo "deleting $STACK_NAME"
+              aws cloudformation delete-stack --stack-name $STACK_NAME
+              echo "WAITING on $STACK_NAME to be deleted..."
+              aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
             done
 
 workflows:
