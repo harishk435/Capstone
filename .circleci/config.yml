@@ -96,6 +96,7 @@ jobs:
             sleep 25
 
   delete-cluster:
+    executor: aws-eks/python3
     parameters:
       cluster_name:
         description: |
@@ -106,10 +107,10 @@ jobs:
       - run:
           name: delete stack
           command: |
-            for stackName in $(aws cloudformation list-stacks --query "StackSummaries[].StackName" --stack-status-filter CREATE_COMPLETE);
+            for awsStackName in $(aws cloudformation list-stacks --query "StackSummaries[].StackName" --stack-status-filter CREATE_COMPLETE);
             do
-              echo "deleting $nams"
-              aws cloudformation delete-stack --stack-name $stackName
+              echo "deleting $awsStackName"
+              aws cloudformation delete-stack --stack-name $awsStackName
             done
 
 workflows:
