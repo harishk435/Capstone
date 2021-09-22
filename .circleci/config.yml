@@ -132,8 +132,8 @@ workflows:
           requires: [docker/publish]
           cluster_name: udacity-capstone
       - deploy-app:
-        requires: [create-eks-cluster]
+          requires: [eks-cluster-setup]
           cluster_name: udacity-capstone
       #- delete-cluster:
-        #requires: [deploy-pods]
+        #requires: [deploy-app]
         #  cluster_name: udacity-capstone
