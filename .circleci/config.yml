@@ -105,6 +105,7 @@ jobs:
     steps:
       - checkout
       - kubernetes/install
+      - aws-cli/setup
       - run:
           name: delete stack
           command: |
