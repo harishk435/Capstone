@@ -131,4 +131,4 @@ workflows:
           #cluster_name: udacity-capstone
       - delete-cluster:
         #requires: [deploy-pods]
-          cluster-name: udacity-capstone
+          cluster_name: udacity-capstone
