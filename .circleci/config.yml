@@ -96,25 +96,21 @@ jobs:
             sleep 25
 
   delete-cluster:
-    executor: aws-eks/python3
     parameters:
       cluster_name:
         description: |
           EKS cluster Name
         type: string
     steps:
-      - checkout
-      - kubernetes/install
       - aws-cli/setup
       - run:
           name: delete stack
           command: |
-            for nams in $(kubectl get ns -o jsonpath="{.items[*].metadata.name}" | grep -v kube-system);
+            for stackName in $(aws cloudformation list-stacks --query "StackSummaries[].StackName" --stack-status-filter CREATE_COMPLETE);
             do
               echo "deleting $nams"
-              kubectl delete ns $nams
+              aws cloudformation delete-stack --stack-name $stackName
             done
-            eksctl delete cluster --name << parameters.cluster_name >>
 
 workflows:
   default:
