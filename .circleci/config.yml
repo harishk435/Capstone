@@ -113,6 +113,6 @@ workflows:
       #- deploy-app:
         #requires: [create-eks-cluster]
           #cluster_name: udacity-capstone
-      aws-eks/delete-cluster:
+      - aws-eks/delete-cluster:
         #requires: [deploy-pods]
-        cluster-name: udacity-capstone
+          cluster-name: udacity-capstone
