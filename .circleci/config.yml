@@ -86,8 +86,8 @@ jobs:
             # Rolling out deployment 
             kubectl apply -f ./deployments/deployment.yml
             kubectl apply -f ./services/service.yml
-            kubectl get deployment uda_capstone
-            kubectl rollout restart deployment/uda_capstone
+            kubectl get deployment uda-capstone
+            kubectl rollout restart deployment/uda-capstone
             
             # Check services, nodes and pods status
             sleep 25
