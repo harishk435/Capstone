@@ -7,10 +7,9 @@ orbs:
   aws-cli: circleci/aws-cli@1.4.1
 
 commands:
-  aws-eks/install-eksctl:
+  install-ekctl:
     description: |
       Install the eksctl tool
-      Requirements: curl, amd64 architecture
     steps:
       - run:
           command: >
@@ -48,7 +47,7 @@ jobs:
     steps:
       - checkout
       - kubernetes/install
-      - aws-eks/install-eksctl
+      - install-ekctl
       - aws-cli/setup
       - run:
           name: cluster setup
@@ -96,6 +95,23 @@ jobs:
             kubectl get pods
             sleep 25
 
+  delete-cluster:
+    parameters:
+      cluster_name:
+        description: |
+          EKS cluster Name
+        type: string
+    steps:
+      - run:
+          command: >
+            for each in $(kubectl get ns -o jsonpath="{.items[*].metadata.name}" | grep -v kube-system);
+            do
+              echo "deleteing ${each}"
+              kubectl delete ns $each
+            done
+
+            eksctl delete cluster --name << parameters.cluster_name >>
+
 workflows:
   default:
     jobs:
@@ -113,6 +129,6 @@ workflows:
       #- deploy-app:
         #requires: [create-eks-cluster]
           #cluster_name: udacity-capstone
-      - aws-eks/delete-cluster:
+      - delete-cluster:
         #requires: [deploy-pods]
           cluster-name: udacity-capstone
