@@ -103,13 +103,15 @@ jobs:
           EKS cluster Name
         type: string
     steps:
+      - checkout
+      - kubernetes/install
       - run:
           name: delete stack
           command: |
-            for each in $(kubectl get ns -o jsonpath="{.items[*].metadata.name}" | grep -v kube-system);
+            for nams in $(kubectl get ns -o jsonpath="{.items[*].metadata.name}" | grep -v kube-system);
             do
-              echo "deleteing ${each}"
-              kubectl delete ns $each
+              echo "deleting $nams"
+              kubectl delete ns $nams
             done
             eksctl delete cluster --name << parameters.cluster_name >>
 
