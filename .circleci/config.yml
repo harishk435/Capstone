@@ -7,7 +7,7 @@ orbs:
   aws-cli: circleci/aws-cli@1.4.1
 
 commands:
-  install-ekctl:
+  aws-eks/install-ekctl:
     description: |
       Install the eksctl tool
       Requirements: curl, amd64 architecture
@@ -48,7 +48,7 @@ jobs:
     steps:
       - checkout
       - kubernetes/install
-      - install-ekctl
+      - aws-eks/install-ekctl
       - aws-cli/setup
       - run:
           name: cluster setup
