@@ -1,0 +1,115 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@1.7.0
+  aws-eks: circleci/aws-eks@1.1.0
+  kubernetes: circleci/kubernetes@0.12.0
+  aws-cli: circleci/aws-cli@1.4.1
+
+commands:
+  install-ekctl:
+    description: |
+      Install the eksctl tool
+      Requirements: curl, amd64 architecture
+    steps:
+      - run:
+          command: >
+            if which eksctl > /dev/null; then
+              echo "eksctl is already installed"
+              exit 0
+            fi
+
+            mkdir -p eksctl_download
+
+            curl --silent --location --retry 5
+            "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
+              | tar xz -C eksctl_download
+            chmod +x eksctl_download/eksctl
+
+            SUDO=""
+
+            if [ $(id -u) -ne 0 ] && which sudo > /dev/null ; then
+              SUDO="sudo"
+            fi
+
+            $SUDO mv eksctl_download/eksctl /usr/local/bin/
+
+            rmdir eksctl_download
+          name: Install the eksctl tool
+
+jobs:
+  eks-cluster-setup:
+    executor: aws-eks/python3
+    parameters:
+      cluster_name:
+        description: |
+          EKS cluster Name
+        type: string
+    steps:
+      - checkout
+      - kubernetes/install
+      - install-ekctl
+      - aws-cli/setup
+      - run:
+          name: cluster setup
+          command: |
+            #Only create cluster if not exists  
+            export completeStackCount=`aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE | grep "<< parameters.cluster_name >>" | wc -l`
+            if [[ $completeStackCount -gt 0 ]]
+            then
+              echo "Cluster already created"
+            else
+              echo "Creating Cluster"
+              eksctl create cluster --name << parameters.cluster_name >> --region $AWS_DEFAULT_REGION --node-type m5.large --nodes 2 --nodes-min 2 --nodes-max 4 --managed
+            fi
+
+  deploy-app:
+    executor: aws-eks/python3
+    parameters:
+      cluster_name:
+        description: |
+          EKS cluster Name
+        type: string
+    steps:
+      - checkout
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster_name >>
+      - run:
+          name: deployment
+          command: |
+            # Check services, nodes and pods status
+            kubectl get services
+            kubectl get nodes
+            kubectl get pods
+            
+            # Rolling out deployment 
+            kubectl apply -f ./deployments/deployment.yml
+            kubectl apply -f ./services/service.yml
+            kubectl get deployment uda_capstone
+            kubectl rollout restart deployment/uda_capstone
+            
+            # Check services, nodes and pods status
+            sleep 25
+            kubectl get services
+            kubectl get nodes
+            kubectl get pods
+            sleep 25
+
+workflows:
+  default:
+    jobs:
+      #- docker/hadolint:
+       #   dockerfiles: ./Dockerfile
+        #  ignore-rules: 'DL4005,DL3008'
+      #- docker/publish:
+       #   requires: [docker/hadolint]
+       #   image: harishkumarrajput/$CIRCLE_PROJECT_REPONAME
+       #   update-description: true
+       #   tag: latest
+      #- eks-cluster-setup: 
+        #  requires: [docker/publish]
+        #  cluster_name: udacity-capstone
+      - deploy-app:
+        #requires: [create-eks-cluster]
+          cluster_name: udacity-capstone
