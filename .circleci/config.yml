@@ -96,7 +96,7 @@ jobs:
             sleep 25
 
   delete-cluster:
-    executor: aws-eks/python3
+    #executor: aws-eks/python3
     parameters:
       cluster_name:
         description: |
@@ -107,7 +107,8 @@ jobs:
       - run:
           name: delete stack
           command: |
-            for awsStackName in $(aws cloudformation list-stacks --region=$AWS_DEFAULT_REGION --query "Stacks[].StackName" --stack-status-filter CREATE_COMPLETE);
+            echo "deleting $AWS_DEFAULT_REGION"
+            for awsStackName in $(aws cloudformation list-stacks --region=$AWS_DEFAULT_REGION --stack-status-filter CREATE_COMPLETE | grep "<< parameters.cluster_name >>");
             do
               echo "deleting $awsStackName"
               aws cloudformation delete-stack --stack-name $awsStackName
