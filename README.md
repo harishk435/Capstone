@@ -1,4 +1,7 @@
 
+![CircleCI](https://circleci.com/gh/harishk435/capstone/tree/main.svg?style=svg)
+(https://circleci.com/gh/harishk435/capstone/tree/main)
+
 # udacity - capstone
 This project is a rolling deployment of Apache website via. Docker and AWS Kubernetes and Circle CI is used for Continuous Integration.
 
