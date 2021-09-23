@@ -21,7 +21,7 @@ spec:
         app: uda-capstone
     spec:
       containers:
-      - image: harishkumarrajput/$CIRCLE_PROJECT_REPONAME:latest
+      - image: harishkumarrajput/capstone
         imagePullPolicy: Always
         name: uda-capstone
         ports:
