@@ -103,10 +103,12 @@ jobs:
           EKS cluster Name
         type: string
     steps:
+      - kubernetes/install
       - aws-cli/setup
       - run:
           name: delete stack
           command: |
+            kubectl delete --all namespaces
             export STACK_LIST=`$(aws cloudformation list-stacks --region=${AWS_DEFAULT_REGION} --stack-status-filter CREATE_COMPLETE --query StackSummaries[].StackName)`
             echo ${STACK_LIST[*]}
             for STACK_NAME in ${STACK_LIST[*]};
@@ -120,19 +122,19 @@ jobs:
 workflows:
   default:
     jobs:
-      #- docker/hadolint:
-      #    dockerfiles: ./Dockerfile
-      #    ignore-rules: 'DL4005,DL3008'
-      #- docker/publish:
-      #    requires: [docker/hadolint]
-      #    image: harishkumarrajput/$CIRCLE_PROJECT_REPONAME
-      #    update-description: true
-      #    tag: latest
-      #- eks-cluster-setup: 
-      #    requires: [docker/publish]
-      #    cluster_name: udacity-capstone
+      - docker/hadolint:
+          dockerfiles: ./Dockerfile
+          ignore-rules: 'DL4005,DL3008'
+      - docker/publish:
+          requires: [docker/hadolint]
+          image: harishkumarrajput/$CIRCLE_PROJECT_REPONAME
+          update-description: true
+          tag: latest
+      - eks-cluster-setup: 
+          requires: [docker/publish]
+          cluster_name: udacity-capstone
       - deploy-app:
-        #  requires: [eks-cluster-setup]
+          requires: [eks-cluster-setup]
           cluster_name: udacity-capstone
       #- delete-cluster:
         #requires: [deploy-app]
